@@ -263,6 +263,7 @@ ICONES = {
     "estrela": '<path d="M12 2.5l2.94 5.96 6.56.95-4.75 4.63 1.12 6.54L12 17.5l-5.87 3.08 1.12-6.54L2.5 9.41l6.56-.95z"/>',
     "app": '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
     "check": '<path d="M20 6 9 17l-5-5"/>',
+    "olho": '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
 }
 ZAP_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.47 1.07 2.88 1.21 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.27.49 1.7.63.72.23 1.37.2 1.88.12.58-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41-.08-.13-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.88 9.88m8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.9a11.82 11.82 0 0 0-3.48-8.41"/></svg>'
 
@@ -274,6 +275,9 @@ def ico(nome, tam=20, cls=""):
 
 
 LOGO = '<img class="logo" src="/assets/img/logo.png" alt="iPiscinas" width="159" height="40">'
+LOGO_TOPO = ('<img class="logo logo--cor" src="/assets/img/logo.png" alt="iPiscinas" width="159" height="40">'
+             '<img class="logo logo--branco" src="/assets/img/logo-branco.png" alt="" aria-hidden="true" width="159" height="40">')
+RAIA_BOIAS = '<div class="boias" aria-hidden="true"><span></span></div>'
 CREDITO = '<a class="credito" href="https://grbrands.com.br" target="_blank" rel="noopener">Desenvolvido por <b><svg class="gr-ico" viewBox="22.5 22 84 84" aria-hidden="true" focusable="false" style="display:inline-block;width:1.5em;height:1.5em;vertical-align:-.45em;margin-right:.4em;flex:none"><clipPath id="gr-ct"><rect x="-60" y="-60" width="220" height="107"/></clipPath><clipPath id="gr-cb"><rect x="-60" y="53" width="220" height="160"/></clipPath><g transform="translate(25.3 24) scale(1.00125) translate(-16 -8.2)"><g fill="currentColor" transform="rotate(-22 50 50)"><g clip-path="url(#gr-ct)"><circle cx="60" cy="50" r="38"/></g><g clip-path="url(#gr-cb)"><circle cx="50" cy="50" r="38"/></g></g></g></svg>GR Brands<i>.</i></b></a>'
 
 
@@ -336,24 +340,26 @@ def topo(atual):
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 <header class="topo">
   <div class="topo__in">
-    <a class="topo__marca" href="/" aria-label="iPiscinas, página inicial">{LOGO}</a>
+    <a class="topo__marca" href="/" aria-label="iPiscinas, página inicial">{LOGO_TOPO}</a>
     <nav class="nav" aria-label="Principal">{links}</nav>
-    <div class="topo__acoes">
-      <a class="btn btn--claro btn--p" href="{APP}/login">Entrar</a>
-      <a class="btn btn--p" href="{APP}/register">Criar conta</a>
+    <div class="topo__acoes" data-sessao-fora>
+      <a class="btn btn--claro btn--p" href="/entrar/">Entrar</a>
+      <a class="btn btn--p" href="/criar-conta/">Criar conta</a>
     </div>
+    <a class="topo__eu btn btn--claro btn--p" href="/conta/" data-sessao-dentro hidden>{ico("user", 16)}<span data-sessao-nome>Minha conta</span></a>
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="gaveta" aria-label="Abrir menu">{ico("menu", 22)}</button>
   </div>
 </header>
 <div class="veu" aria-hidden="true"></div>
-<nav class="gaveta" id="gaveta" aria-label="Menu">{gaveta}<div class="gaveta__acoes"><a class="btn btn--claro" href="{APP}/login">Entrar</a><a class="btn" href="{APP}/register">Criar conta</a></div></nav>
+<nav class="gaveta" id="gaveta" aria-label="Menu">{gaveta}<div class="gaveta__acoes" data-sessao-fora><a class="btn btn--claro" href="/entrar/">Entrar</a><a class="btn" href="/criar-conta/">Criar conta</a></div></nav>
 """
 
 
 def rodape():
     nav = "".join(f'<li><a href="{h}">{t}</a></li>' for h, t in NAV + [("/conta/", "Conta")])
     cats = "".join(f'<li><a href="/buscar/?cat={k}">{t}</a></li>' for k, t, _, _ in CATS)
-    return f"""<footer class="rodape">
+    return f"""<div class="wrap rodape__boias">{RAIA_BOIAS}</div>
+<footer class="rodape">
   <div class="rodape__in">
     <div class="rodape__col rodape__marca">
       {LOGO}
@@ -574,7 +580,7 @@ def cabeca_secao(titulo, em="", nota="", acao="", hid=""):
 def pag_inicio(lojas, piscinas, destaque_ids, posts):
     dest = [piscinas[i] for i in destaque_ids]
     # raias do topo: fotos reais dos modelos em destaque, escolhidas a dedo
-    raias_sel = [("cmtjhoj0i03a76i825l6p7g3l", 1), ("cmqpgfryj0046egh5g8q322t0", 2), ("cmtnqeo0s00bnvror413358ub", 1)]
+    raias_sel = [("cmqpgfryj0046egh5g8q322t0", 2), ("cmtjhoj0i03a76i825l6p7g3l", 1), ("cmtnqeo0s00bnvror413358ub", 1)]
     # se alguma loja sair do ar, completa com outro destaque que tenha foto
     for p in dest:
         if len([1 for pid, _ in raias_sel if pid in piscinas]) >= 3:
@@ -589,9 +595,10 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
             continue
         u = p["fotos"][min(nf, len(p["fotos"]) - 1)]["url"]
         carregar = 'fetchpriority="high"' if k == 0 else 'loading="lazy" decoding="async"'
+        pr = preco(p.get("precoBase"))
         raias.append(f"""<a class="raia raia--{k + 1}" href="/piscina/{pid}/">
-  <img src="{e(img(u, 700))}" srcset="{srcset(u, 420, 700)}" sizes="(max-width: 900px) 30vw, 230px" alt="Piscina {e(limpa(p['nome']))}" width="420" height="640" {carregar}>
-  <span class="raia__leg"><strong>{e(limpa(p['nome']))}</strong>{e(limpa(p['loja']['nome']))}</span>
+  <span class="raia__foto"><img src="{e(img(u, 900))}" srcset="{srcset(u, 500, 900)}" sizes="(max-width: 700px) 44vw, 340px" alt="Piscina {e(limpa(p['nome']))}, de {e(limpa(p['loja']['nome']))}" width="500" height="700" {carregar}></span>
+  <span class="raia__leg"><strong>{e(limpa(p['nome']))}</strong><span>{e(limpa(p['loja']['nome']))}{' · ' + e(pr) if pr else ''}</span></span>
 </a>""")
 
     cont_cat = {k: sum(1 for l in lojas if k in cats_de(l)) for k, *_ in CATS}
@@ -618,15 +625,16 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
         if len(sel) == 8:
             break
     ricas = sel
-    blog = "".join(cartao_post(p) for p in posts[:3])
+    pd, resto = destaque_e_resto(posts)
+    blog = (post_destaque(pd) if pd else "") + (f'<div class="posts-lado">{"".join(cartao_post(x) for x in resto[:2])}</div>' if resto else "")
     n = len(lojas)
     ld = [LD_ORG, LD_SITE, {"@type": "WebPage", "@id": SITE + "/#pagina", "url": SITE + "/", "name": "iPiscinas",
                             "isPartOf": {"@id": SITE + "/#site"}, "inLanguage": "pt-BR"}]
     desc = f"Encontre lojas de piscinas, piscineiros, manutenção e produtos químicos perto de você. {n} lojas ativas no iPiscinas. Compare modelos e peça orçamento grátis."
     return cabeca("iPiscinas · Lojas de piscinas, piscineiros e orçamentos", desc, "/", ld=ld) + topo("/") + f"""
 <main id="conteudo">
-  <section class="heroi heroi--inicio">
-    <div class="wrap heroi__grade">
+  <section class="heroi heroi--inicio heroi--centro">
+    <div class="wrap">
       <div class="heroi__txt">
         <p class="heroi__ola">Olá 👋</p>
         <h1>Tudo para sua piscina<em>em um só lugar.</em></h1>
@@ -640,12 +648,13 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
             <label for="uf-heroi">Estado</label>
             <select id="uf-heroi" name="uf">{opcoes}</select>
           </div>
-          <button class="btn btn--cheio" type="submit">{ico("search", 18)}Buscar</button>
+          <button class="btn" type="submit">{ico("search", 18)}Buscar</button>
         </form>
-        <p class="heroi__conta">{ico("estrela", 16)}<span><strong>{n} lojas ativas</strong> no iPiscinas</span></p>
+        <p class="heroi__conta"><span class="heroi__estrelas">{ico("estrela", 15)}{ico("estrela", 15)}{ico("estrela", 15)}{ico("estrela", 15)}{ico("estrela", 15)}</span><span><strong>{n} lojas ativas</strong> no iPiscinas</span></p>
       </div>
       <div class="raias" aria-label="Modelos em destaque">{"".join(raias)}</div>
     </div>
+    <div class="wrap">{RAIA_BOIAS}</div>
   </section>
 
   <section class="sec" aria-labelledby="t-cats">
@@ -674,7 +683,6 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
       <a class="faixa" href="/mapa/">
         <span class="faixa__txt"><strong>Veja as lojas no mapa</strong><span>Lojas de piscinas, piscineiros e assistência pelo Brasil.</span></span>
         <span class="btn btn--branco">{ico("map", 18)}Abrir o mapa</span>
-        <svg class="faixa__ondas" viewBox="0 0 400 120" aria-hidden="true"><path d="M0 30c33-14 67-14 100 0s67 14 100 0 67-14 100 0 67 14 100 0M0 60c33-14 67-14 100 0s67 14 100 0 67-14 100 0 67 14 100 0M0 90c33-14 67-14 100 0s67 14 100 0 67-14 100 0 67 14 100 0"/></svg>
       </a>
     </div>
   </section>
@@ -682,7 +690,7 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
   <section class="sec" aria-labelledby="t-blog">
     <div class="wrap">
       {cabeca_secao("Blog e notícias", "do mercado de piscinas.", acao=f'<a class="btn btn--claro" href="/blog/">Ver o blog</a>', hid="t-blog")}
-      <div class="posts">{blog}</div>
+      <div class="blog-capa">{blog}</div>
     </div>
   </section>
 
@@ -698,14 +706,54 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
 """ + rodape() + fim()
 
 
+SIGLAS = {"ipiscinas": "iPiscinas", "uol": "UOL", "tse": "TSE", "meta": "Meta", "google": "Google", "brasil": "Brasil"}
+
+
+def titulo_post(t):
+    """Título todo em maiúsculas vira caixa normal (só a forma; o texto é o mesmo)."""
+    t = limpa(t)
+    letras = [c for c in t if c.isalpha()]
+    if not letras or sum(c.isupper() for c in letras) / len(letras) < .8:
+        return t
+    palavras = t.lower().split(" ")
+    palavras = [SIGLAS.get(w.strip(",.:;!?"), None) and w.replace(w.strip(",.:;!?"), SIGLAS[w.strip(",.:;!?")]) or w for w in palavras]
+    s = " ".join(palavras)
+    return s[:1].upper() + s[1:]
+
+
+def tipo_post(p):
+    return (p.get("categoria") or {}).get("nome") or ("Notícia" if p.get("tipo") == "NOTICIA" else "Blog")
+
+
+def post_destaque(p, h="h3"):
+    capa = p.get("capaUrl")
+    rotulo = "Notícia" if p.get("tipo") == "NOTICIA" else tipo_post(p)
+    return f"""<a class="post-d" href="/blog/{e(p['slug'])}/">
+  <span class="post-d__capa">{f'<img src="{e(img(capa, 1100))}" srcset="{srcset(capa, 640, 1100)}" sizes="(max-width: 900px) 92vw, 640px" alt="{e(p.get("capaAlt") or "")}" width="1100" height="620" loading="lazy" decoding="async">' if capa else ''}</span>
+  <span class="post-d__txt">
+    <span class="post-d__meta"><span class="post-d__tipo">{e(rotulo)}</span><time datetime="{e(p.get('publicadoEm'))}">{data_br(p['publicadoEm'])}</time></span>
+    <{h} class="post-d__tit">{e(titulo_post(p['titulo']))}</{h}>
+    <span class="post-d__res">{e(resumo(p.get('resumo'), 230))}</span>
+    <span class="post-d__ler">Ler {'a notícia' if p.get('tipo') == 'NOTICIA' else 'o artigo'} {ico("seta", 16)}</span>
+  </span>
+</a>"""
+
+
+def destaque_e_resto(posts):
+    """A notícia mais recente abre o blog; sem notícia, o post mais recente."""
+    ordem = sorted(posts, key=lambda p: p.get("publicadoEm") or "", reverse=True)
+    dest = next((p for p in ordem if p.get("tipo") == "NOTICIA"), ordem[0] if ordem else None)
+    return dest, [p for p in ordem if p is not dest]
+
+
 def cartao_post(p, h="h3"):
-    cat = (p.get("categoria") or {}).get("nome") or ("Notícia" if p.get("tipo") == "NOTICIA" else "Blog")
+    cat = tipo_post(p)
     capa = p.get("capaUrl")
     return f"""<a class="post" href="/blog/{e(p['slug'])}/">
   <span class="post__capa">{f'<img src="{e(img(capa, 640))}" srcset="{srcset(capa, 400, 640)}" sizes="(max-width: 700px) 92vw, 380px" alt="{e(p.get("capaAlt") or "")}" width="640" height="360" loading="lazy" decoding="async">' if capa else ''}</span>
   <span class="post__txt">
-    <span class="post__meta">{e(cat)} · {p.get('tempoLeituraMin') or 1} min de leitura</span>
-    <{h} class="post__tit">{e(limpa(p['titulo']))}</{h}>
+    <span class="post__meta">{e(cat)} · <time datetime="{e(p.get('publicadoEm'))}">{data_br(p['publicadoEm'])}</time></span>
+    <{h} class="post__tit">{e(titulo_post(p['titulo']))}</{h}>
     <span class="post__res">{e(resumo(p.get('resumo'), 140))}</span>
   </span>
 </a>"""
@@ -875,8 +923,9 @@ def pag_blog(posts, categorias):
         f'<li><button type="button" class="chip" aria-pressed="false" data-filtro="{e(c["slug"])}">{e(c["nome"])}</button></li>'
         for c in categorias if any((p.get("categoria") or {}).get("slug") == c["slug"] for p in posts)
     )
+    pd, resto = destaque_e_resto(posts)
     cartoes = "".join(
-        f'<div data-cat="{e((p.get("categoria") or {}).get("slug") or "")}">{cartao_post(p, "h2")}</div>' for p in posts
+        f'<div data-cat="{e((p.get("categoria") or {}).get("slug") or "")}">{cartao_post(p, "h2")}</div>' for p in resto
     )
     mig = [("Início", "/"), ("Blog", "/blog/")]
     return cabeca("Blog e notícias sobre piscinas | iPiscinas",
@@ -885,6 +934,8 @@ def pag_blog(posts, categorias):
 <main id="conteudo">
   {heroi("Blog e notícias", "do mercado de piscinas.", mig=mig, sub="Pesquisas, notícias e dicas para quem compra, cuida e vende piscinas.", cls="heroi--centro")}
   <div class="wrap pag-corpo">
+    {post_destaque(pd, "h2") if pd else ""}
+    <h2 class="bloco-tit bloco-tit--centro">Todos os posts</h2>
     <ul class="chips chips--filtro" data-filtros>{chips}</ul>
     <div class="posts posts--lista" data-posts>{cartoes}</div>
   </div>
@@ -894,8 +945,8 @@ def pag_blog(posts, categorias):
 
 def pag_post(p, todos):
     caminho = f"/blog/{p['slug']}/"
-    tit = limpa(p["titulo"])
-    cat = (p.get("categoria") or {}).get("nome") or ("Notícia" if p.get("tipo") == "NOTICIA" else "Blog")
+    tit = titulo_post(p["titulo"])
+    cat = tipo_post(p)
     autor = (p.get("autor") or {}).get("name") or "iPiscinas"
     capa = p.get("capaUrl")
     rel = [x for x in todos if x["slug"] != p["slug"]][:3]
@@ -988,15 +1039,82 @@ def pag_mapa(lojas):
 """ + rodape() + fim('<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>\n')
 
 
+def campo_senha(id_, rotulo, auto, ph):
+    return f"""<div class="campo"><label for="{id_}">{rotulo}</label>
+      <div class="senha"><input id="{id_}" name="senha" type="password" autocomplete="{auto}" required minlength="6" maxlength="72" placeholder="{ph}" data-senha>
+      <button class="senha__ver" type="button" aria-label="Mostrar senha" aria-pressed="false" data-ver-senha>{ico("olho", 18)}</button></div>
+      <small class="erro" aria-live="polite"></small></div>"""
+
+
+def pag_acesso(caminho, titulo, em, sub, form, rodape_form):
+    return cabeca(f"{titulo} | iPiscinas", sub, caminho, indexar=False) + topo("") + f"""
+<main id="conteudo">
+  {heroi(titulo, em, sub=sub, cls="heroi--centro heroi--acesso")}
+  <div class="wrap acesso">
+    <div class="acesso__card">
+      {form}
+      <p class="acesso__aviso" role="alert" aria-live="assertive" data-aviso hidden></p>
+      {rodape_form}
+    </div>
+  </div>
+</main>
+""" + rodape() + fim()
+
+
+def pag_entrar():
+    form = f"""<form class="form" data-acesso="entrar" novalidate>
+      <div class="campo"><label for="email-e">E-mail</label>
+        <input id="email-e" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="120" placeholder="seu@email.com" data-email>
+        <small class="erro" aria-live="polite"></small></div>
+      {campo_senha("senha-e", "Senha", "current-password", "Sua senha")}
+      <button class="btn btn--cheio" type="submit" data-enviar>Entrar</button>
+    </form>"""
+    pe = f"""<p class="acesso__troca">Ainda não tem conta? <a class="link" href="/criar-conta/">Criar conta</a></p>
+      <p class="acesso__volta"><a href="/">{ico("volta", 15)}Continuar sem entrar</a></p>
+      <p class="acesso__loja">Tem uma loja ou presta serviço de piscina? <a class="link" href="{APP}/cadastrar-loja">Cadastre aqui</a></p>"""
+    return pag_acesso("/entrar/", "Entrar na sua conta", "", "Acesse para solicitar orçamentos e acompanhar suas conversas.", form, pe)
+
+
+def pag_criar_conta():
+    form = f"""<form class="form" data-acesso="criar" novalidate>
+      <div class="campo"><label for="nome-c">Nome completo</label>
+        <input id="nome-c" name="nome" type="text" autocomplete="name" required maxlength="80" placeholder="Como podemos te chamar" data-nome>
+        <small class="erro" aria-live="polite"></small></div>
+      <div class="campo"><label for="email-c">E-mail</label>
+        <input id="email-c" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="120" placeholder="seu@email.com" data-email>
+        <small class="erro" aria-live="polite"></small></div>
+      <div class="campo"><label for="fone-c">WhatsApp com DDD</label>
+        <input id="fone-c" name="telefone" type="tel" inputmode="numeric" autocomplete="tel-national" required placeholder="(17) 99999-9999" data-fone>
+        <small class="erro" aria-live="polite"></small></div>
+      {campo_senha("senha-c", "Senha", "new-password", "Mínimo 6 caracteres")}
+      <button class="btn btn--cheio" type="submit" data-enviar>Criar conta</button>
+    </form>"""
+    pe = f"""<p class="acesso__troca">Já tem conta? <a class="link" href="/entrar/">Entrar</a></p>
+      <p class="acesso__loja">Tem uma loja ou presta serviço de piscina? <a class="link" href="{APP}/cadastrar-loja">Cadastre aqui</a></p>"""
+    return pag_acesso("/criar-conta/", "Bem-vindo ao iPiscinas", "", "Crie sua conta em menos de 1 minuto.", form, pe)
+
+
 def pag_conta():
-    acoes = f"""<div class="heroi__acoes">
-        <a class="btn btn--branco" href="{APP}/login">Entrar</a>
-        <a class="btn btn--vidro" href="{APP}/register">Criar conta {ico("seta", 16)}</a>
+    fora = f"""<div class="heroi__acoes" data-sessao-fora>
+        <a class="btn btn--branco" href="/entrar/">Entrar</a>
+        <a class="btn btn--vidro" href="/criar-conta/">Criar conta {ico("seta", 16)}</a>
       </div>"""
+    dentro = f"""<div class="wrap acesso" data-sessao-dentro hidden>
+    <div class="acesso__card conta-card">
+      <span class="conta-card__ico">{ico("user", 26)}</span>
+      <h2 data-sessao-nome>Sua conta</h2>
+      <p class="conta-card__email" data-sessao-email></p>
+      <div class="conta-card__acoes">
+        <a class="btn btn--claro" href="/buscar/">{ico("search", 18)}Buscar lojas e piscinas</a>
+        <button class="btn btn--claro" type="button" data-sair>Sair da conta</button>
+      </div>
+    </div>
+  </div>"""
     return cabeca("Acesse sua conta | iPiscinas", "Entre ou crie uma conta no iPiscinas para solicitar orçamentos e acompanhar conversas com as lojas.",
                   "/conta/", indexar=False) + topo("/conta/") + f"""
-<main id="conteudo">
-  {heroi("Acesse sua conta", sub="Entre ou crie uma conta para solicitar orçamentos e acompanhar conversas.", extra=acoes, cls="heroi--centro heroi--so")}
+<main id="conteudo" data-conta>
+  {heroi("Acesse sua conta", sub="Entre ou crie uma conta para solicitar orçamentos e acompanhar conversas.", extra=fora, cls="heroi--centro heroi--conta heroi--so")}
+  {dentro}
 </main>
 """ + rodape() + fim()
 
@@ -1049,7 +1167,7 @@ def sitemap(urls):
     if PREVIA:
         (RAIZ / "robots.txt").write_text("User-agent: *\nDisallow: /\n")
     else:
-        (RAIZ / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /conta/\n\nSitemap: {SITE}/sitemap.xml\n")
+        (RAIZ / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /conta/\nDisallow: /entrar/\nDisallow: /criar-conta/\n\nSitemap: {SITE}/sitemap.xml\n")
 
 
 def main():
@@ -1064,6 +1182,8 @@ def main():
     escrever("/mapa/", pag_mapa(lojas))
     escrever("/blog/", pag_blog(posts, cats_blog))
     escrever("/conta/", pag_conta())
+    escrever("/entrar/", pag_entrar())
+    escrever("/criar-conta/", pag_criar_conta())
     (RAIZ / "404.html").write_text(com_base(pag_404()))
     for p in posts:
         escrever(f"/blog/{p['slug']}/", pag_post(p, posts))

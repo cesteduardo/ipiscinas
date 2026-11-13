@@ -24,8 +24,8 @@
     img.src = original(img.src);
   }, true);
 
-  /* ---------- ilha ---------- */
-  const marcar = () => doc.classList.toggle('solido', scrollY > 40);
+  /* ---------- topo: colado na borda, se solta em pílula ao rolar ---------- */
+  const marcar = () => doc.classList.toggle('solto', scrollY > 24);
   marcar();
   addEventListener('scroll', marcar, { passive: true });
 
@@ -130,23 +130,24 @@
   };
   const foneValido = (d) => /^[1-9][1-9]\d{8,9}$/.test(d) && (d.length === 10 ? /^[2-5]/.test(d[2]) : d[2] === '9');
 
-  $$('[data-orcamento]').forEach((form) => {
-    const nome = $('[data-nome]', form);
-    const fone = $('[data-fone]', form);
-    const cidade = $('[data-cidade]', form);
-    const msg = $('textarea', form);
-    const ok = form.parentElement.querySelector('.orc__ok');
-    const reabrir = ok && $('[data-reabrir]', ok);
-
-    /* o caractere inválido nem aparece; o input limpa o que escapar (autocorretor, arrastar) */
-    const filtrar = (el, fn, permitido) => {
-      el.addEventListener('beforeinput', (ev) => {
-        if (ev.data && ev.inputType.startsWith('insert') && ev.inputType !== 'insertFromPaste' && !permitido.test(ev.data)) ev.preventDefault();
-      });
-      el.addEventListener('input', () => { const v = fn(el.value); if (v !== el.value) el.value = v; });
-    };
-    filtrar(nome, soNome, /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/);
-    filtrar(cidade, soCidade, /^[A-Za-zÀ-ÖØ-öø-ÿ' .-]+$/);
+  /* campos com filtro: o caractere inválido nem aparece; o input limpa o que escapar (autocorretor, arrastar) */
+  const colar = (el, fn) => el.addEventListener('paste', (ev) => {
+    ev.preventDefault();
+    el.value = fn((ev.clipboardData || window.clipboardData).getData('text'));
+    el.dispatchEvent(new Event('input'));
+  });
+  const filtrar = (el, fn, permitido, max) => {
+    if (!el) return;
+    el.addEventListener('beforeinput', (ev) => {
+      if (ev.data && ev.inputType.startsWith('insert') && ev.inputType !== 'insertFromPaste' && !permitido.test(ev.data)) ev.preventDefault();
+    });
+    el.addEventListener('input', () => { const v = fn(el.value); if (v !== el.value) el.value = v; });
+    colar(el, (t) => fn(t).slice(0, max));
+  };
+  const ligarNome = (el) => filtrar(el, soNome, /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/, 80);
+  const ligarCidade = (el) => filtrar(el, soCidade, /^[A-Za-zÀ-ÖØ-öø-ÿ' .-]+$/, 60);
+  const ligarFone = (fone) => {
+    if (!fone) return;
     fone.addEventListener('beforeinput', (ev) => {
       if (ev.inputType === 'insertText' && ev.data && /\D/.test(ev.data)) ev.preventDefault();
       const dig = fone.value.replace(/\D/g, '');
@@ -155,40 +156,47 @@
     fone.addEventListener('input', () => { fone.value = mascara(normFone(fone.value)); });
     fone.addEventListener('paste', (ev) => {
       ev.preventDefault();
+      ev.stopImmediatePropagation();
       fone.value = mascara(normFone((ev.clipboardData || window.clipboardData).getData('text'), true));
-      fone.dispatchEvent(new Event('change'));
     });
-    nome.addEventListener('paste', (ev) => {
-      ev.preventDefault();
-      nome.value = soNome((ev.clipboardData || window.clipboardData).getData('text')).slice(0, 80);
-    });
-    cidade.addEventListener('paste', (ev) => {
-      ev.preventDefault();
-      cidade.value = soCidade((ev.clipboardData || window.clipboardData).getData('text')).slice(0, 60);
-    });
+  };
+  const erro = (el, texto) => {
+    const campo = el.closest('.campo');
+    campo.classList.toggle('tem-erro', !!texto);
+    $('.erro', campo).textContent = texto || '';
+    el.setAttribute('aria-invalid', texto ? 'true' : 'false');
+    return !texto;
+  };
+  const erroNome = (n) => (!n ? 'Digite seu nome.' : n.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, '').length < 2 || !/\s\S/.test(n) ? 'Digite nome e sobrenome.' : '');
+  const erroFone = (d) => (!d ? 'Digite seu WhatsApp com DDD.' : !foneValido(d) ? 'Confira o número: DDD + celular, como (17) 99999-9999.' : '');
 
-    const erro = (el, texto) => {
-      const campo = el.closest('.campo');
-      campo.classList.toggle('tem-erro', !!texto);
-      $('.erro', campo).textContent = texto || '';
-      el.setAttribute('aria-invalid', texto ? 'true' : 'false');
-      return !texto;
-    };
+  $$('[data-orcamento]').forEach((form) => {
+    const nome = $('[data-nome]', form);
+    const fone = $('[data-fone]', form);
+    const cidade = $('[data-cidade]', form);
+    const msg = $('textarea', form);
+    const ok = form.parentElement.querySelector('.orc__ok');
+    const reabrir = ok && $('[data-reabrir]', ok);
+    ligarNome(nome);
+    ligarCidade(cidade);
+    ligarFone(fone);
+
     const checar = () => {
       const n = nome.value.trim();
       const d = normFone(fone.value);
       const c = cidade.value.trim();
       const m = msg.value.trim();
       const r = [
-        [nome, !n ? 'Digite seu nome.' : n.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, '').length < 2 || !/\s\S/.test(n) ? 'Digite nome e sobrenome.' : ''],
-        [fone, !d ? 'Digite seu WhatsApp com DDD.' : !foneValido(d) ? 'Confira o número: DDD + celular, como (17) 99999-9999.' : ''],
+        [nome, erroNome(n)],
+        [fone, erroFone(d)],
         [cidade, !c ? 'Digite sua cidade.' : c.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, '').length < 2 ? 'Digite o nome da cidade.' : ''],
         [msg, !m ? 'Conte o que você procura.' : m.length < 5 ? 'Escreva um pouco mais.' : ''],
       ];
       r.forEach(([el, t]) => erro(el, t));
       return r.find(([, t]) => t)?.[0] || null;
     };
-    [nome, fone, cidade, msg].forEach((el) => el.addEventListener('blur', () => { if (el.closest('.campo').classList.contains('tem-erro')) checar(); }));
+    /* o erro some enquanto a pessoa corrige; no blur o botão pularia e o clique cairia fora dele */
+    [nome, fone, cidade, msg].forEach((el) => el.addEventListener('input', () => { if (el.closest('.campo').classList.contains('tem-erro')) checar(); }));
 
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
@@ -218,6 +226,108 @@
         ok.hidden = false;
         $('h3', ok).setAttribute('tabindex', '-1');
         $('h3', ok).focus();
+      }
+    });
+  });
+
+  /* ---------- conta: mesma API e mesmas chaves de sessão do app iPiscinas ---------- */
+  const API = 'https://api.ipiscinas.com.br/api';
+  const CHAVE = 'ipiscinas-cliente-token';
+  const CHAVE_R = 'ipiscinas-cliente-refresh';
+  const guardado = {
+    get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* navegação privada */ } },
+    tira: (k) => { try { localStorage.removeItem(k); } catch (e) { /* navegação privada */ } },
+  };
+  const api = async (rota, { metodo = 'GET', corpo, auth } = {}) => {
+    const cab = { 'Content-Type': 'application/json' };
+    const tk = auth && guardado.get(CHAVE);
+    if (tk) cab.Authorization = `Bearer ${tk}`;
+    const r = await fetch(API + rota, { method: metodo, headers: cab, body: corpo ? JSON.stringify(corpo) : undefined, cache: 'no-store' });
+    let dado = null;
+    try { dado = await r.json(); } catch (e) { /* sem corpo */ }
+    if (!r.ok) { const er = new Error((dado && dado.message) || r.statusText); er.status = r.status; throw er; }
+    return dado;
+  };
+  const primeiroNome = (n) => String(n || '').trim().split(/\s+/)[0] || 'Minha conta';
+  const mostrarSessao = (eu) => {
+    $$('[data-sessao-fora]').forEach((el) => { el.hidden = !!eu; });
+    $$('[data-sessao-dentro]').forEach((el) => { el.hidden = !eu; });
+    if (!eu) return;
+    $$('[data-sessao-nome]').forEach((el) => { el.textContent = el.tagName === 'H2' ? `Olá, ${primeiroNome(eu.name || eu.nome)}` : primeiroNome(eu.name || eu.nome); });
+    $$('[data-sessao-email]').forEach((el) => { el.textContent = eu.email || ''; });
+  };
+  if (guardado.get(CHAVE)) {
+    api('/auth/me', { auth: true }).then(mostrarSessao).catch((er) => {
+      if (er.status === 401) { guardado.tira(CHAVE); guardado.tira(CHAVE_R); }
+      mostrarSessao(null);
+    });
+  }
+  $('[data-sair]')?.addEventListener('click', async () => {
+    const rt = guardado.get(CHAVE_R);
+    await api('/auth/logout', { metodo: 'POST', auth: true, corpo: { refreshToken: rt } }).catch(() => null);
+    guardado.tira(CHAVE); guardado.tira(CHAVE_R);
+    mostrarSessao(null);
+  });
+
+  $$('[data-ver-senha]').forEach((b) => b.addEventListener('click', () => {
+    const inp = b.previousElementSibling;
+    const ver = inp.type === 'password';
+    inp.type = ver ? 'text' : 'password';
+    b.setAttribute('aria-pressed', String(ver));
+    b.setAttribute('aria-label', ver ? 'Esconder senha' : 'Mostrar senha');
+  }));
+
+  const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+  $$('[data-acesso]').forEach((form) => {
+    const criar = form.dataset.acesso === 'criar';
+    const nome = $('[data-nome]', form);
+    const email = $('[data-email]', form);
+    const fone = $('[data-fone]', form);
+    const senha = $('[data-senha]', form);
+    const botao = $('[data-enviar]', form);
+    const aviso = form.parentElement.querySelector('[data-aviso]');
+    ligarNome(nome);
+    ligarFone(fone);
+    email.addEventListener('beforeinput', (ev) => { if (ev.data && ev.inputType === 'insertText' && /\s/.test(ev.data)) ev.preventDefault(); });
+    email.addEventListener('input', () => { const v = email.value.replace(/\s/g, ''); if (v !== email.value) email.value = v; });
+    const checar = () => {
+      const r = [];
+      if (criar) r.push([nome, erroNome(nome.value.trim())]);
+      const em = email.value.trim();
+      r.push([email, !em ? 'Digite seu e-mail.' : !emailOk(em) ? 'Confira o e-mail, como nome@exemplo.com.' : '']);
+      if (criar) r.push([fone, erroFone(normFone(fone.value))]);
+      const sv = senha.value;
+      r.push([senha, !sv ? 'Digite sua senha.' : criar && sv.length < 6 ? 'A senha precisa de pelo menos 6 caracteres.' : !sv.trim() ? 'A senha não pode ser só espaços.' : '']);
+      r.forEach(([el, t]) => erro(el, t));
+      return r.find(([, t]) => t)?.[0] || null;
+    };
+    $$('input', form).forEach((el) => el.addEventListener('input', () => { if (el.closest('.campo').classList.contains('tem-erro')) checar(); }));
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      aviso.hidden = true;
+      const ruim = checar();
+      if (ruim) { ruim.focus(); return; }
+      const rotulo = botao.textContent;
+      botao.disabled = true;
+      botao.textContent = criar ? 'Criando sua conta…' : 'Entrando…';
+      try {
+        const corpo = criar
+          ? { name: nome.value.trim(), email: email.value.trim().toLowerCase(), phone: mascara(normFone(fone.value)), password: senha.value }
+          : { email: email.value.trim().toLowerCase(), password: senha.value };
+        const r = await api(criar ? '/auth/register' : '/auth/login', { metodo: 'POST', corpo });
+        guardado.set(CHAVE, r.accessToken);
+        if (r.refreshToken) guardado.set(CHAVE_R, r.refreshToken);
+        const volta = new URLSearchParams(location.search).get('volta');
+        location.href = volta && volta.startsWith('/') && !volta.startsWith('//') ? volta : `${BASE}/conta/`;
+      } catch (er) {
+        aviso.textContent = er.status === 401 ? 'E-mail ou senha incorretos.'
+          : er.status === 409 || /exist|cadastrad/i.test(er.message) ? 'Este e-mail já tem conta. Entre com ele ou use outro.'
+          : er.status === 400 ? 'Confira os dados e tente de novo.'
+          : 'Não foi possível conectar agora. Tente de novo em instantes.';
+        aviso.hidden = false;
+        botao.disabled = false;
+        botao.textContent = rotulo;
       }
     });
   });

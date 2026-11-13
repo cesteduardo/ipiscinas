@@ -1,7 +1,7 @@
 # Pendências
 
 1. **WhatsApp do iPiscinas:** o número no site atual é `(17) 99612-3456`, que parece de teste (sequência). Mantive igual; confirmar o número real em `ZAP_IPISCINAS` no `_fonte/build.py`.
-2. **Onde fica o app:** login, cadastro, conta e o orçamento interno (`/orcamento/novo`) continuam no app atual (`APP` no build). Se este site assumir o domínio principal, o app precisa ir para um subdomínio (ex.: app.ipiscinas.com.br) e o `APP` muda junto.
+2. **Login e cadastro:** as páginas `/entrar/` e `/criar-conta/` agora são do site novo e usam a API real (`/auth/login`, `/auth/register`, `/auth/me`, `/auth/logout`), com as mesmas chaves de sessão do app (`ipiscinas-cliente-token`). No domínio final, a sessão é a mesma do app. **Atenção:** quem se cadastrar pela prévia do GitHub cria conta de verdade no sistema deles. O telefone virou obrigatório (padrão GR: sem campo opcional) e vai no formato `(17) 99999-9999`. "Cadastre aqui", para lojistas, continua indo para `/cadastrar-loja` do app (`APP` no build), assim como o orçamento interno (`/orcamento/novo`).
 3. **Orçamento:** no site novo o pedido vai pelo WhatsApp da loja, sem passar pelo sistema de orçamentos do app. Confirmar se é isso que querem ou se o formulário deve gravar na API (precisa de endpoint público ou token).
 4. **Atualização dos dados:** o site é uma fotografia da API no momento do build. Rodar `python3 _fonte/build.py --fresco` todo dia (cron ou GitHub Action) para lojas e modelos novos aparecerem.
 5. **Coordenadas:** 346 lojas têm endereço, mas só 34 têm latitude/longitude válidas; o resto está com 0,0 e fica fora do mapa.
