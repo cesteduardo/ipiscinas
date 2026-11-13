@@ -835,7 +835,7 @@ def pag_loja(l):
       </div>
     </div>"""
     return cabeca(f"{nome}{' · ' + cid if cid else ''} | iPiscinas", desc_meta, caminho, og=og,
-                  ld=[LD_ORG, LD_SITE, negocio, ld_migalhas(mig)]) + topo("") + f"""
+                  ld=[LD_ORG, LD_SITE, negocio, ld_migalhas(mig)]) + topo("/buscar/") + f"""
 <main id="conteudo">
   {heroi(e(nome), mig=mig, extra=cartao, cls="heroi--loja")}
   <div class="wrap duas">
@@ -882,7 +882,7 @@ def pag_piscina(p):
     lis_chips = "".join(f"<li>{e(c)}</li>" for c in chips)
     extra = (f'<ul class="chips">{lis_chips}</ul>' if chips else "") + f'<p class="heroi__preco">{e(pr) if pr else "Preço sob consulta"}</p>'
     return cabeca(f"{nome} · {lnome} | iPiscinas", meta, caminho, og=img(fotos[0], 1200) if fotos else None,
-                  ld=[LD_ORG, LD_SITE, prod, ld_migalhas(mig)]) + topo("") + f"""
+                  ld=[LD_ORG, LD_SITE, prod, ld_migalhas(mig)]) + topo("/buscar/") + f"""
 <main id="conteudo">
   {heroi(e(nome), mig=mig, extra=extra, cls="heroi--piscina")}
   <div class="wrap piscina">
