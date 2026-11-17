@@ -364,8 +364,7 @@ def topo(atual):
 def rodape():
     nav = "".join(f'<li><a href="{h}">{t}</a></li>' for h, t in NAV + [("/conta/", "Conta")])
     cats = "".join(f'<li><a href="/buscar/?cat={k}">{t}</a></li>' for k, t, _, _ in CATS)
-    return f"""<div class="rodape__boias">{RAIA_BOIAS}</div>
-<footer class="rodape" data-agua>
+    return f"""<footer class="rodape" data-agua>
   <div class="rodape__in">
     <div class="rodape__col rodape__marca">
       {LOGO_BRANCO}

@@ -663,11 +663,9 @@ main[data-conta]:has([data-sessao-dentro]:not([hidden])) .heroi--conta { padding
 /* ---------- rodapé: centralizado, cantos de cima arredondados, no mesmo azul fundo do topo ---------- */
 .rodape { background: linear-gradient(180deg, #035f93 0, #034b78 100%); color: #fff; border-radius: var(--r-xl) var(--r-xl) 0 0; padding: clamp(44px, 6vw, 64px) 0 calc(28px + var(--folga-abas) + env(safe-area-inset-bottom)); text-align: center; }
 /* ondas leves no rodapé: as pastilhas vistas pela água, com a luz correndo por cima do azul */
-.rodape { position: relative; isolation: isolate; }
+.rodape { position: relative; isolation: isolate; margin-top: clamp(48px, 7vw, 88px); }
 .agua { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; border-radius: inherit; opacity: 0; pointer-events: none; mix-blend-mode: screen; transition: opacity 1.2s var(--ease); }
 .agua.pronta { opacity: .55; }
-.rodape__boias { position: relative; z-index: 1; margin-top: clamp(48px, 7vw, 88px); margin-bottom: -8px; }
-.rodape__boias .boias { margin-top: 0; }
 .rodape__in { width: 100%; max-width: var(--max); margin-inline: auto; padding-inline: var(--pad); display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.2fr; gap: 32px; }
 .rodape__col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .rodape__marca p { color: rgb(255 255 255 / .74); max-width: 34ch; font-size: 15px; }
