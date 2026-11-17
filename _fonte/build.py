@@ -257,7 +257,8 @@ ICONES = {
     "alvo": '<circle cx="12" cy="12" r="3"/><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/><circle cx="12" cy="12" r="7"/>',
     "user": '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
     "x": '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
-    "menu": '<path d="M4 8h16"/><path d="M4 16h16"/>',
+    "casa": '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    "jornal": '<path d="M15 18h-5"/><path d="M18 14h-8"/><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/>',
     "regua": '<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/>',
     "relogio": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     "estrela": '<path d="M12 2.5l2.94 5.96 6.56.95-4.75 4.63 1.12 6.54L12 17.5l-5.87 3.08 1.12-6.54L2.5 9.41l6.56-.95z"/>',
@@ -328,30 +329,34 @@ def cabeca(titulo, desc, caminho, og=None, ld=None, indexar=True, extra=""):
 """
 
 
+TABS = [("/", "Início", "casa", "brilho"), ("/buscar/", "Buscar", "search", "procura"), ("/mapa/", "Mapa", "map", "cai"),
+        ("/blog/", "Blog", "jornal", "folha"), ("/conta/", "Conta", "user", "aceno")]
+
+
 def topo(atual):
     links = "".join(
         f'<a href="{h}"{" aria-current=page" if h == atual else ""}>{t}</a>' for h, t in NAV
     )
-    gaveta = "".join(
-        f'<a href="{h}"{" aria-current=page" if h == atual else ""}><span>{i:02d}</span>{t}</a>'
-        for i, (h, t) in enumerate(NAV + [("/conta/", "Conta")], 1)
+    # barra de vidro líquido do celular: a gota escorre até a aba tocada
+    abas = "".join(
+        f'<a class="abas__item" href="{h}" data-fx="{fx}"{" aria-current=page" if h == atual else ""}>'
+        f'<span class="abas__ico">{ico(i, 22)}</span><span class="abas__txt">{t}</span></a>'
+        for h, t, i, fx in TABS
     )
     return f"""<body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 <header class="topo">
   <div class="topo__in">
     <a class="topo__marca" href="/" aria-label="iPiscinas, página inicial">{LOGO_TOPO}</a>
-    <nav class="nav" aria-label="Principal">{links}</nav>
+    <nav class="nav liquido" aria-label="Principal"><span class="liquido__gota" aria-hidden="true"></span>{links}</nav>
     <div class="topo__acoes" data-sessao-fora>
       <a class="btn btn--claro btn--p" href="/entrar/">Entrar</a>
       <a class="btn btn--p" href="/criar-conta/">Criar conta</a>
     </div>
     <a class="topo__eu btn btn--claro btn--p" href="/conta/" data-sessao-dentro hidden>{ico("user", 16)}<span data-sessao-nome>Minha conta</span></a>
-    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="gaveta" aria-label="Abrir menu">{ico("menu", 22)}</button>
   </div>
 </header>
-<div class="veu" aria-hidden="true"></div>
-<nav class="gaveta" id="gaveta" aria-label="Menu">{gaveta}<div class="gaveta__acoes" data-sessao-fora><a class="btn btn--claro" href="/entrar/">Entrar</a><a class="btn" href="/criar-conta/">Criar conta</a></div></nav>
+<nav class="abas liquido" aria-label="Atalhos"><span class="liquido__gota" aria-hidden="true"></span>{abas}</nav>
 """
 
 
@@ -597,7 +602,7 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
         carregar = 'fetchpriority="high"' if k == 0 else 'loading="lazy" decoding="async"'
         pr = preco(p.get("precoBase"))
         raias.append(f"""<a class="raia raia--{k + 1}" href="/piscina/{pid}/">
-  <span class="raia__foto"><img src="{e(img(u, 900))}" srcset="{srcset(u, 500, 900)}" sizes="(max-width: 700px) 44vw, 340px" alt="Piscina {e(limpa(p['nome']))}, de {e(limpa(p['loja']['nome']))}" width="500" height="700" {carregar}></span>
+  <span class="raia__foto" data-agua><img crossorigin="anonymous" src="{e(img(u, 900))}" srcset="{srcset(u, 500, 900)}" sizes="(max-width: 700px) 44vw, 340px" alt="Piscina {e(limpa(p['nome']))}, de {e(limpa(p['loja']['nome']))}" width="500" height="700" {carregar}></span>
   <span class="raia__leg"><strong>{e(limpa(p['nome']))}</strong><span>{e(limpa(p['loja']['nome']))}{' · ' + e(pr) if pr else ''}</span></span>
 </a>""")
 
@@ -703,7 +708,7 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
     </div>
   </section>
 </main>
-""" + rodape() + fim()
+""" + rodape() + fim(f'<script src="/assets/js/agua.js?v={VERSAO}" defer></script>\n')
 
 
 SIGLAS = {"ipiscinas": "iPiscinas", "uol": "UOL", "tse": "TSE", "meta": "Meta", "google": "Google", "brasil": "Brasil"}

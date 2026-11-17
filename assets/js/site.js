@@ -1,4 +1,4 @@
-/* iPiscinas · ilha, menu, carrosséis, galeria, orçamento, busca, mapa e lojas próximas */
+/* iPiscinas · ilha, vidro líquido, carrosséis, galeria, orçamento, busca, mapa e lojas próximas */
 (() => {
   const doc = document.documentElement;
   const BASE = doc.dataset.base || '';
@@ -29,20 +29,90 @@
   marcar();
   addEventListener('scroll', marcar, { passive: true });
 
-  const btn = $('.menu-btn');
-  const gaveta = $('#gaveta');
-  if (btn && gaveta) {
-    const abrir = (sim) => {
-      btn.setAttribute('aria-expanded', String(sim));
-      btn.setAttribute('aria-label', sim ? 'Fechar menu' : 'Abrir menu');
-      doc.classList.toggle('menu-aberto', sim);
+  /* ---------- vidro líquido: a gota corre com mola e estica conforme a velocidade ---------- */
+  const liquido = (barra) => {
+    const gota = $('.liquido__gota', barra);
+    const itens = $$('a', barra);
+    if (!gota || !itens.length) return;
+    const atual = itens.find((a) => a.hasAttribute('aria-current'));
+    const ehAbas = barra.classList.contains('abas');
+    const est = { x: 0, w: 0, vx: 0, vw: 0, tx: 0, tw: 0, o: 0, to: 0, quadro: 0, ultimo: 0 };
+    const medir = (a) => ({ x: a.offsetLeft, w: a.offsetWidth, y: a.offsetTop, h: a.offsetHeight });
+    const pintar = () => {
+      const v = Math.min(Math.abs(est.vx) / 2600, 0.22);
+      barra.style.setProperty('--gota-x', est.x.toFixed(2) + 'px');
+      barra.style.setProperty('--gota-w', Math.max(0, est.w).toFixed(2) + 'px');
+      barra.style.setProperty('--gota-sx', (1 + v).toFixed(4));
+      barra.style.setProperty('--gota-sy', (1 - v * 0.55).toFixed(4));
+      barra.style.setProperty('--gota-o', String(est.to));
     };
-    btn.addEventListener('click', () => abrir(btn.getAttribute('aria-expanded') !== 'true'));
-    $('.veu')?.addEventListener('click', () => abrir(false));
-    gaveta.addEventListener('click', (ev) => { if (ev.target.closest('a')) abrir(false); });
-    addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && doc.classList.contains('menu-aberto')) { abrir(false); btn.focus(); } });
-    matchMedia('(min-width: 861px)').addEventListener('change', (m) => { if (m.matches) abrir(false); });
-  }
+    const passo = (agora) => {
+      const dt = Math.min((agora - (est.ultimo || agora)) / 1000, 1 / 30);
+      est.ultimo = agora;
+      // mola subamortecida: chega, passa um tico e assenta, como água
+      const k = 260, c = 24;
+      est.vx += (k * (est.tx - est.x) - c * est.vx) * dt;
+      est.vw += (k * (est.tw - est.w) - c * est.vw) * dt;
+      est.x += est.vx * dt;
+      est.w += est.vw * dt;
+      pintar();
+      const parado = Math.abs(est.tx - est.x) < 0.3 && Math.abs(est.vx) < 4 && Math.abs(est.tw - est.w) < 0.3;
+      if (parado) { est.x = est.tx; est.w = est.tw; est.vx = est.vw = 0; pintar(); est.quadro = 0; est.ultimo = 0; return; }
+      est.quadro = requestAnimationFrame(passo);
+    };
+    const ir = (a, salto) => {
+      if (!a) { est.to = 0; pintar(); return; }
+      const m = medir(a);
+      barra.style.setProperty('--gota-y', m.y + 'px');
+      barra.style.setProperty('--gota-h', m.h + 'px');
+      est.tx = m.x; est.tw = m.w;
+      if (salto || calmo || !est.to) {
+        // primeira aparição nasce no lugar, sem viajar desde a borda
+        est.x = m.x; est.w = m.w; est.vx = est.vw = 0;
+        est.to = 1; pintar();
+        return;
+      }
+      est.to = 1;
+      if (!est.quadro) est.quadro = requestAnimationFrame(passo);
+    };
+    barra.classList.add('liquido--vivo');
+    ir(atual, true);
+    // a medida muda quando o topo se solta ou a tela gira
+    new ResizeObserver(() => ir(barra.querySelector('a.alvo') || atual, true)).observe(barra);
+    addEventListener('pageshow', (ev) => { if (ev.persisted) { itens.forEach((a) => a.classList.remove('alvo')); ir(atual, true); if (!atual) { est.to = 0; pintar(); } } });
+
+    if (!ehAbas) {
+      // computador: a gota segue o mouse e volta para a página atual
+      itens.forEach((a) => {
+        a.addEventListener('pointerenter', () => ir(a));
+        a.addEventListener('focus', () => ir(a));
+      });
+      const voltar = () => { if (atual) ir(atual); else { est.to = 0; pintar(); } };
+      barra.addEventListener('pointerleave', voltar);
+      barra.addEventListener('focusout', (ev) => { if (!barra.contains(ev.relatedTarget)) voltar(); });
+      return;
+    }
+    // celular: a gota escorre até a aba, o ícone faz o gesto dele e só então a página troca
+    itens.forEach((a) => {
+      a.addEventListener('click', (ev) => {
+        if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+        const fx = a.dataset.fx;
+        if (fx && !calmo) {
+          a.classList.remove('fx-' + fx);
+          void a.offsetWidth;
+          a.classList.add('fx-' + fx);
+          a.addEventListener('animationend', () => a.classList.remove('fx-' + fx), { once: true });
+        }
+        if (a === atual) { ev.preventDefault(); scrollTo({ top: 0, behavior: calmo ? 'auto' : 'smooth' }); return; }
+        if (calmo) return;
+        ev.preventDefault();
+        itens.forEach((b) => b.classList.toggle('alvo', b === a));
+        ir(a);
+        setTimeout(() => { location.href = a.href; }, 300);
+      });
+    });
+  };
+  $$('.liquido').forEach(liquido);
 
   /* ---------- carrossel infinito: no fim volta ao começo ---------- */
   const passo = (trilho, dir) => {
