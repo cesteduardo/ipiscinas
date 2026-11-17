@@ -278,6 +278,7 @@ def ico(nome, tam=20, cls=""):
 LOGO = '<img class="logo" src="/assets/img/logo.png" alt="iPiscinas" width="159" height="40">'
 LOGO_TOPO = ('<img class="logo logo--cor" src="/assets/img/logo.png" alt="iPiscinas" width="159" height="40">'
              '<img class="logo logo--branco" src="/assets/img/logo-branco.png" alt="" aria-hidden="true" width="159" height="40">')
+LOGO_BRANCO = '<img class="logo" src="/assets/img/logo-branco.png" alt="iPiscinas" width="159" height="40">'
 RAIA_BOIAS = '<div class="boias" aria-hidden="true"><span></span></div>'
 CREDITO = '<a class="credito" href="https://grbrands.com.br" target="_blank" rel="noopener">Desenvolvido por <b><svg class="gr-ico" viewBox="22.5 22 84 84" aria-hidden="true" focusable="false" style="display:inline-block;width:1.5em;height:1.5em;vertical-align:-.45em;margin-right:.4em;flex:none"><clipPath id="gr-ct"><rect x="-60" y="-60" width="220" height="107"/></clipPath><clipPath id="gr-cb"><rect x="-60" y="53" width="220" height="160"/></clipPath><g transform="translate(25.3 24) scale(1.00125) translate(-16 -8.2)"><g fill="currentColor" transform="rotate(-22 50 50)"><g clip-path="url(#gr-ct)"><circle cx="60" cy="50" r="38"/></g><g clip-path="url(#gr-cb)"><circle cx="50" cy="50" r="38"/></g></g></g></svg>GR Brands<i>.</i></b></a>'
 
@@ -367,7 +368,7 @@ def rodape():
 <footer class="rodape" data-agua>
   <div class="rodape__in">
     <div class="rodape__col rodape__marca">
-      {LOGO}
+      {LOGO_BRANCO}
       <p>A mesma experiência do app iPiscinas, agora também no navegador. Descubra lojas, modelos de piscinas e solicite orçamentos.</p>
     </div>
     <div class="rodape__col"><h2>Navegue</h2><ul>{nav}</ul></div>

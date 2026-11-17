@@ -93,19 +93,20 @@ void main() {
   gl_FragColor = vec4(min(cor, 1.), 1.);
 }`;
 
-  const PARAMS = { azul: 0.4, escala: 7, luz: 0.15, distSup: 0.05, distAgua: 0.04 };
+  const PARAMS = { azul: 0.4, escala: 7, luz: 0.3, distSup: 0.05, distAgua: 0.04 };
   const LADO = 128;        // lado da textura em px de CSS (4 × 4 pastilhas de 32 px)
   const RES = 0.6;         // a onda é macia: desenha em resolução reduzida e o CSS amplia
   const MAX_W = 1400;
 
-  /* piso de pastilhas em tons de azul bem claro, com rejunte branco; tamanho potência de 2 para repetir */
+  /* piso de pastilhas para o rodapé azul: o canvas entra em "screen", então o escuro some no azul
+     e só o rejunte e a luz da água clareiam; tamanho potência de 2 para repetir */
   const piso = () => {
     const c = document.createElement('canvas');
     c.width = c.height = 256;
     const x = c.getContext('2d');
-    x.fillStyle = '#ffffff';
+    x.fillStyle = '#123c5c';
     x.fillRect(0, 0, 256, 256);
-    const tons = ['#d6ecf9', '#cfe8f8', '#ddf0fb', '#c8e4f6', '#e2f2fc', '#d2eaf8', '#cbe6f7', '#d9eefa'];
+    const tons = ['#04121f', '#020c16', '#061827', '#010910', '#05141f', '#030f1a', '#020b14', '#06172a'];
     const n = 4, l = 256 / n, r = 10;
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
