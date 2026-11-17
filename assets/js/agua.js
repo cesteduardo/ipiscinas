@@ -136,10 +136,9 @@ void main() {
     gl.useProgram(prog);
     const u = (n) => gl.getUniformLocation(prog, n);
     const U = {
-      tempo: u('u_tempo'), ratio: u('u_ratio'), imgRatio: u('u_img_ratio'), forca: u('u_forca'),
+      tempo: u('u_tempo'), ratio: u('u_ratio'), imgRatio: u('u_img_ratio'), forca: u('u_forca'), escala: u('u_escala'),
     };
     gl.uniform1f(u('u_azul'), PARAMS.azul);
-    gl.uniform1f(u('u_escala'), PARAMS.escala);
     gl.uniform1f(u('u_luz'), PARAMS.luz);
     gl.uniform1f(u('u_dist_sup'), PARAMS.distSup);
     gl.uniform1f(u('u_dist_agua'), PARAMS.distAgua);
@@ -168,6 +167,8 @@ void main() {
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       gl.viewport(0, 0, w, h);
       gl.uniform1f(U.ratio, w / h);
+      // ondas do mesmo tamanho na foto grande e nas pequenas
+      gl.uniform1f(U.escala, PARAMS.escala * Math.min(Math.max(caixa.clientHeight / 300, 0.8), 1.9));
     };
 
     const textura = () => {

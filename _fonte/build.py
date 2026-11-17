@@ -363,7 +363,7 @@ def topo(atual):
 def rodape():
     nav = "".join(f'<li><a href="{h}">{t}</a></li>' for h, t in NAV + [("/conta/", "Conta")])
     cats = "".join(f'<li><a href="/buscar/?cat={k}">{t}</a></li>' for k, t, _, _ in CATS)
-    return f"""<div class="wrap rodape__boias">{RAIA_BOIAS}</div>
+    return f"""<div class="rodape__boias">{RAIA_BOIAS}</div>
 <footer class="rodape">
   <div class="rodape__in">
     <div class="rodape__col rodape__marca">
@@ -584,26 +584,28 @@ def cabeca_secao(titulo, em="", nota="", acao="", hid=""):
 
 def pag_inicio(lojas, piscinas, destaque_ids, posts):
     dest = [piscinas[i] for i in destaque_ids]
-    # raias do topo: fotos reais dos modelos em destaque, escolhidas a dedo
-    raias_sel = [("cmqpgfryj0046egh5g8q322t0", 2), ("cmtjhoj0i03a76i825l6p7g3l", 1), ("cmtnqeo0s00bnvror413358ub", 1)]
-    # se alguma loja sair do ar, completa com outro destaque que tenha foto
+    # vitrine do topo: fotos reais e deitadas dos modelos em destaque, escolhidas a dedo
+    vit_sel = [("cmtnqeo0s00bnvror413358ub", 1), ("cmtjhoj0i03a76i825l6p7g3l", 1), ("cmqpgfryj0046egh5g8q322t0", 2)]
+    # se algum modelo sair do ar, completa com outro destaque que tenha foto
+    vit_sel = [(pid, nf) for pid, nf in vit_sel if pid in piscinas]
     for p in dest:
-        if len([1 for pid, _ in raias_sel if pid in piscinas]) >= 3:
+        if len(vit_sel) >= 3:
             break
-        if p.get("fotos") and all(p["id"] != pid for pid, _ in raias_sel):
-            raias_sel.append((p["id"], 0))
-    raias_sel = [(pid, nf) for pid, nf in raias_sel if pid in piscinas][:3]
-    raias = []
-    for k, (pid, nf) in enumerate(raias_sel):
+        if p.get("fotos") and all(p["id"] != pid for pid, _ in vit_sel):
+            vit_sel.append((p["id"], 0))
+    vitrine = []
+    for k, (pid, nf) in enumerate(vit_sel[:3]):
         p = piscinas.get(pid)
         if not p or not p.get("fotos"):
             continue
         u = p["fotos"][min(nf, len(p["fotos"]) - 1)]["url"]
         carregar = 'fetchpriority="high"' if k == 0 else 'loading="lazy" decoding="async"'
+        tam = (f'srcset="{srcset(u, 800, 1400)}" sizes="(max-width: 700px) 92vw, 760px"' if k == 0
+               else f'srcset="{srcset(u, 500, 900)}" sizes="(max-width: 700px) 46vw, 420px"')
         pr = preco(p.get("precoBase"))
-        raias.append(f"""<a class="raia raia--{k + 1}" href="/piscina/{pid}/">
-  <span class="raia__foto" data-agua><img crossorigin="anonymous" src="{e(img(u, 900))}" srcset="{srcset(u, 500, 900)}" sizes="(max-width: 700px) 44vw, 340px" alt="Piscina {e(limpa(p['nome']))}, de {e(limpa(p['loja']['nome']))}" width="500" height="700" {carregar}></span>
-  <span class="raia__leg"><strong>{e(limpa(p['nome']))}</strong><span>{e(limpa(p['loja']['nome']))}{' · ' + e(pr) if pr else ''}</span></span>
+        vitrine.append(f"""<a class="vit vit--{k + 1}" href="/piscina/{pid}/">
+  <span class="vit__foto" data-agua><img crossorigin="anonymous" src="{e(img(u, 900 if k else 1400))}" {tam} alt="Piscina {e(limpa(p['nome']))}, de {e(limpa(p['loja']['nome']))}" width="1400" height="930" {carregar}></span>
+  <span class="vit__leg"><strong>{e(limpa(p['nome']))}</strong><span>{e(limpa(p['loja']['nome']))}{' · ' + e(pr) if pr else ''}</span></span>
 </a>""")
 
     cont_cat = {k: sum(1 for l in lojas if k in cats_de(l)) for k, *_ in CATS}
@@ -657,9 +659,9 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
         </form>
         <p class="heroi__conta"><span class="heroi__estrelas">{ico("estrela", 15)}{ico("estrela", 15)}{ico("estrela", 15)}{ico("estrela", 15)}{ico("estrela", 15)}</span><span><strong>{n} lojas ativas</strong> no iPiscinas</span></p>
       </div>
-      <div class="raias" aria-label="Modelos em destaque">{"".join(raias)}</div>
+      <div class="vitrine" aria-label="Modelos em destaque">{"".join(vitrine)}</div>
     </div>
-    <div class="wrap">{RAIA_BOIAS}</div>
+    {RAIA_BOIAS}
   </section>
 
   <section class="sec" aria-labelledby="t-cats">

@@ -114,6 +114,24 @@
   };
   $$('.liquido').forEach(liquido);
 
+  /* ---------- hover: a luz da água segue o cursor dentro de cartões e botões ---------- */
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches && !calmo) {
+    const LUZ = '.cat, .cp, .cl, .post, .post-d, .vit, .rodape__zap, .btn, .faixa';
+    let ultimo = null, quadro = 0;
+    addEventListener('pointermove', (ev) => {
+      ultimo = ev;
+      if (quadro) return;
+      quadro = requestAnimationFrame(() => {
+        quadro = 0;
+        const el = ultimo.target instanceof Element && ultimo.target.closest(LUZ);
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (ultimo.clientX - r.left).toFixed(1) + 'px');
+        el.style.setProperty('--my', (ultimo.clientY - r.top).toFixed(1) + 'px');
+      });
+    }, { passive: true });
+  }
+
   /* ---------- carrossel infinito: no fim volta ao começo ---------- */
   const passo = (trilho, dir) => {
     const item = trilho.firstElementChild;
