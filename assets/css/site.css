@@ -270,8 +270,6 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .vit__foto { position: relative; display: block; height: 100%; border-radius: calc(var(--r-xl) - 6px); overflow: hidden; background: var(--azul-claro); isolation: isolate; }
 .vit__foto::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; box-shadow: inset 0 0 0 1px rgb(11 37 64 / .06); background: linear-gradient(180deg, rgb(6 30 54 / 0) 55%, rgb(6 30 54 / .28)); pointer-events: none; }
 .vit__foto img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--saida); }
-.agua { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .9s var(--ease), transform 1.2s var(--saida); }
-.agua.pronta { opacity: 1; }
 .vit__leg {
   position: absolute; z-index: 3; left: 18px; bottom: 18px; max-width: calc(100% - 36px); display: flex; flex-direction: column;
   padding: 9px 16px; border-radius: 16px; background: rgb(255 255 255 / .86); color: var(--ink); font-size: 13px; line-height: 1.3;
@@ -648,6 +646,10 @@ main[data-conta]:has([data-sessao-dentro]:not([hidden])) .heroi--conta { padding
 
 /* ---------- rodapé: centralizado, cantos de cima arredondados ---------- */
 .rodape { background: var(--superficie); border-radius: var(--r-xl) var(--r-xl) 0 0; padding: clamp(44px, 6vw, 64px) 0 calc(28px + var(--folga-abas) + env(safe-area-inset-bottom)); text-align: center; }
+/* ondas bem leves no rodapé: as pastilhas vistas pela água, quase apagadas atrás do conteúdo */
+.rodape { position: relative; isolation: isolate; }
+.agua { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; border-radius: inherit; opacity: 0; pointer-events: none; transition: opacity 1.2s var(--ease); }
+.agua.pronta { opacity: .3; }
 .rodape__boias { position: relative; z-index: 1; margin-top: clamp(48px, 7vw, 88px); margin-bottom: -8px; }
 .rodape__boias .boias { margin-top: 0; }
 .rodape__in { width: 100%; max-width: var(--max); margin-inline: auto; padding-inline: var(--pad); display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.2fr; gap: 32px; }
@@ -714,7 +716,7 @@ main[data-conta]:has([data-sessao-dentro]:not([hidden])) .heroi--conta { padding
   .vit:hover { transform: translateY(-4px); box-shadow: inset 0 0 0 1px #d3e9f6, 0 2px 4px rgb(11 37 64 / .05), 0 30px 60px -28px rgb(2 100 160 / .45); }
   :is(.cat, .rodape__zap):hover, .cp:hover .cp__nome, .cl:hover strong, .post:hover .post__tit, .post-d:hover .post-d__tit, .vit:hover .vit__leg strong { color: var(--azul-forte); }
   .cat:hover .cat__ico { background: var(--azul); color: #fff; }
-  .cp:hover .cp__foto img, .post-d:hover .post-d__capa img, .vit:hover .vit__foto img, .vit:hover .agua { transform: scale(1.04); }
+  .cp:hover .cp__foto img, .post-d:hover .post-d__capa img, .vit:hover .vit__foto img { transform: scale(1.04); }
   a:hover > .seta-bola, .seta:hover { color: #fff; background: var(--azul); }
   a:hover > .seta-bola { transform: translateX(3px); }
 

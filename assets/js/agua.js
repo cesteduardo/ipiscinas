@@ -1,12 +1,12 @@
-/* iPiscinas · água sobre as fotos do topo
-   A foto fica vista através da superfície de uma piscina: ondas lentas, cáusticas de luz
-   e um balanço mais forte quando o mouse passa. Adaptado do WaterRippleImage (React) para
-   JS puro: cada foto [data-agua] ganha um canvas WebGL por cima da <img>, que continua
-   lá embaixo como reserva (sem WebGL, com "menos movimento" ou se a textura falhar). */
+/* iPiscinas · ondas leves no rodapé
+   O fundo do rodapé vira o piso de pastilhas visto através da água: ondas lentas e cáusticas,
+   no shader do WaterRippleImage (adaptado do React para JS puro). O canvas fica atrás do
+   conteúdo com opacidade baixa (.agua.pronta no CSS). Sem WebGL ou com "menos movimento",
+   o rodapé fica liso como antes. Pausa quando o rodapé sai da tela ou a aba é escondida. */
 (() => {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const fotos = [...document.querySelectorAll('[data-agua]')];
-  if (!fotos.length) return;
+  const caixa = document.querySelector('[data-agua]');
+  if (!caixa) return;
 
   const VERT = `
 attribute vec2 a_pos;
@@ -23,16 +23,15 @@ precision highp float;
 precision mediump float;
 #endif
 varying vec2 vUv;
-uniform sampler2D u_img;
+uniform sampler2D u_piso;
 uniform float u_tempo;
-uniform float u_ratio;
-uniform float u_img_ratio;
+uniform vec2 u_tam;      /* tamanho do rodapé em px de CSS */
+uniform float u_ladrilho; /* lado da textura de pastilhas em px de CSS */
 uniform float u_azul;
 uniform float u_escala;
 uniform float u_luz;
 uniform float u_dist_sup;
 uniform float u_dist_agua;
-uniform float u_forca;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1. / 289.)) * 289.; }
 vec2 mod289(vec2 x) { return x - floor(x * (1. / 289.)) * 289.; }
@@ -75,35 +74,49 @@ float superficie(vec2 uv, float t, float escala) {
 }
 
 void main() {
-  vec2 uv = vUv;
-  uv.y = 1. - uv.y;
-  uv.x *= u_ratio;
+  /* coordenadas da onda em unidades de 300 px: o tamanho da onda não depende do tamanho do rodapé */
+  vec2 px = vec2(vUv.x, 1. - vUv.y) * u_tam;
+  vec2 uv = px / 300.;
   float t = u_tempo;
 
   float onda = snoise((.3 + .1 * sin(t)) * uv + vec2(0., .2 * t));
   float sup = superficie(2. * uv + onda * .2, t, u_escala);
-  sup *= pow(max(uv.y, 0.), .3);
-  sup = pow(sup, 2.);
+  sup = pow(max(sup, 0.), 2.);
 
-  /* cobre a moldura como object-fit: cover, com um zoom leve para a onda nunca mostrar a borda */
-  vec2 iuv = vUv - .5;
-  if (u_ratio > u_img_ratio) iuv.y *= u_img_ratio / u_ratio;
-  else iuv.x *= u_ratio / u_img_ratio;
-  iuv *= .93;
-  iuv += .5;
-  iuv.y = 1. - iuv.y;
-  iuv += u_forca * (u_dist_agua * onda + u_dist_sup * sup);
-  iuv = clamp(iuv, .001, .999);
+  /* as pastilhas se repetem; a água desloca o desenho delas */
+  vec2 puv = px / u_ladrilho;
+  puv += u_dist_agua * onda + u_dist_sup * sup;
 
-  vec4 img = texture2D(u_img, iuv);
-  float luz = u_luz * u_forca;
-  vec3 cor = img.rgb * (1. + luz * sup);
-  cor += luz * vec3(1. - u_azul, 1., 1.) * sup;
+  vec3 cor = texture2D(u_piso, puv).rgb;
+  cor *= 1. + u_luz * sup;
+  cor += u_luz * vec3(1. - u_azul, 1., 1.) * sup;
   gl_FragColor = vec4(min(cor, 1.), 1.);
 }`;
 
-  const PARAMS = { azul: 0.45, escala: 7, luz: 0.12, distSup: 0.028, distAgua: 0.016 };
-  const DPR = Math.min(devicePixelRatio || 1, 1.5);
+  const PARAMS = { azul: 0.4, escala: 7, luz: 0.15, distSup: 0.05, distAgua: 0.04 };
+  const LADO = 128;        // lado da textura em px de CSS (4 × 4 pastilhas de 32 px)
+  const RES = 0.6;         // a onda é macia: desenha em resolução reduzida e o CSS amplia
+  const MAX_W = 1400;
+
+  /* piso de pastilhas em tons de azul bem claro, com rejunte branco; tamanho potência de 2 para repetir */
+  const piso = () => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const x = c.getContext('2d');
+    x.fillStyle = '#ffffff';
+    x.fillRect(0, 0, 256, 256);
+    const tons = ['#d6ecf9', '#cfe8f8', '#ddf0fb', '#c8e4f6', '#e2f2fc', '#d2eaf8', '#cbe6f7', '#d9eefa'];
+    const n = 4, l = 256 / n, r = 10;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        x.fillStyle = tons[(i * 3 + j * 5 + ((i * j) % 3)) % tons.length];
+        x.beginPath();
+        x.roundRect(i * l + 3, j * l + 3, l - 6, l - 6, r);
+        x.fill();
+      }
+    }
+    return c;
+  };
 
   const shader = (gl, tipo, src) => {
     const s = gl.createShader(tipo);
@@ -113,14 +126,12 @@ void main() {
     return s;
   };
 
-  const montar = (caixa) => {
-    const img = caixa.querySelector('img');
-    if (!img) return;
+  const montar = () => {
     const canvas = document.createElement('canvas');
     canvas.className = 'agua';
     canvas.setAttribute('aria-hidden', 'true');
-    const gl = canvas.getContext('webgl', { alpha: false, antialias: false, premultipliedAlpha: false, powerPreference: 'low-power' });
-    if (!gl) return;
+    const gl = canvas.getContext('webgl', { alpha: false, antialias: false, powerPreference: 'low-power' });
+    if (!gl || !CanvasRenderingContext2D.prototype.roundRect) return;
 
     let prog;
     try {
@@ -135,14 +146,14 @@ void main() {
     }
     gl.useProgram(prog);
     const u = (n) => gl.getUniformLocation(prog, n);
-    const U = {
-      tempo: u('u_tempo'), ratio: u('u_ratio'), imgRatio: u('u_img_ratio'), forca: u('u_forca'), escala: u('u_escala'),
-    };
+    const uTempo = u('u_tempo'), uTam = u('u_tam');
     gl.uniform1f(u('u_azul'), PARAMS.azul);
+    gl.uniform1f(u('u_escala'), PARAMS.escala);
     gl.uniform1f(u('u_luz'), PARAMS.luz);
     gl.uniform1f(u('u_dist_sup'), PARAMS.distSup);
     gl.uniform1f(u('u_dist_agua'), PARAMS.distAgua);
-    gl.uniform1i(u('u_img'), 0);
+    gl.uniform1f(u('u_ladrilho'), LADO);
+    gl.uniform1i(u('u_piso'), 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
@@ -153,76 +164,52 @@ void main() {
     const tex = gl.createTexture();
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, piso());
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 
-    let pronto = false, visivel = false, quadro = 0, ultimo = 0, relogio = Math.random() * 40;
-    let forca = 1, alvo = 1;
+    let visivel = false, quadro = 0, ultimo = 0, relogio = Math.random() * 40;
 
     const medir = () => {
-      const w = Math.round(caixa.clientWidth * DPR), h = Math.round(caixa.clientHeight * DPR);
-      if (!w || !h) return;
+      const cw = caixa.clientWidth, ch = caixa.clientHeight;
+      if (!cw || !ch) return;
+      const k = Math.min(RES, MAX_W / cw);
+      const w = Math.round(cw * k), h = Math.round(ch * k);
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       gl.viewport(0, 0, w, h);
-      gl.uniform1f(U.ratio, w / h);
-      // ondas do mesmo tamanho na foto grande e nas pequenas
-      gl.uniform1f(U.escala, PARAMS.escala * Math.min(Math.max(caixa.clientHeight / 300, 0.8), 1.9));
+      gl.uniform2f(uTam, cw, ch);
     };
-
-    const textura = () => {
-      try {
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-      } catch (err) {
-        // foto sem CORS deixa o canvas sujo: fica só a <img>
-        console.warn('agua: textura recusada', err);
-        canvas.remove();
-        return;
-      }
-      gl.uniform1f(U.imgRatio, img.naturalWidth / img.naturalHeight);
-      pronto = true;
-      medir();
-      desenhar(performance.now());
-      requestAnimationFrame(() => canvas.classList.add('pronta'));
-      andar();
-    };
-
-    function desenhar(agora) {
+    const desenhar = (agora) => {
       const dt = Math.min((agora - (ultimo || agora)) / 1000, 0.1);
       ultimo = agora;
       relogio += dt * 2; // mesmo ritmo do original (.002 por ms)
       if (relogio > 4000) relogio -= 4000;
-      // força do balanço anda por tempo, não por quadro
-      forca += (alvo - forca) * (1 - Math.exp(-dt * 4));
-      gl.uniform1f(U.tempo, relogio);
-      gl.uniform1f(U.forca, forca);
+      gl.uniform1f(uTempo, relogio);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
+    };
     const loop = (agora) => {
       quadro = 0;
-      if (!pronto || !visivel || document.hidden) { ultimo = 0; return; }
+      if (!visivel || document.hidden) { ultimo = 0; return; }
       desenhar(agora);
       quadro = requestAnimationFrame(loop);
     };
-    const andar = () => { if (!quadro && pronto && visivel && !document.hidden) quadro = requestAnimationFrame(loop); };
+    const andar = () => { if (!quadro && visivel && !document.hidden) quadro = requestAnimationFrame(loop); };
 
-    new IntersectionObserver((es) => { visivel = es[0].isIntersecting; andar(); }, { rootMargin: '80px' }).observe(caixa);
-    new ResizeObserver(() => { if (pronto) { medir(); if (!quadro) desenhar(performance.now()); } }).observe(caixa);
+    caixa.prepend(canvas);
+    medir();
+    desenhar(performance.now());
+    requestAnimationFrame(() => canvas.classList.add('pronta'));
+
+    new IntersectionObserver((es) => { visivel = es[0].isIntersecting; andar(); }, { rootMargin: '100px' }).observe(caixa);
+    new ResizeObserver(() => { medir(); if (!quadro) desenhar(performance.now()); }).observe(caixa);
     document.addEventListener('visibilitychange', andar);
-    const raia = caixa.closest('a') || caixa;
-    raia.addEventListener('pointerenter', () => { alvo = 1.9; });
-    raia.addEventListener('pointerleave', () => { alvo = 1; });
-    canvas.addEventListener('webglcontextlost', (ev) => { ev.preventDefault(); pronto = false; canvas.remove(); });
-
-    img.after(canvas);
-    const usar = () => (img.naturalWidth ? textura() : null);
-    if (img.complete && img.naturalWidth) usar();
-    else img.addEventListener('load', usar, { once: true });
+    canvas.addEventListener('webglcontextlost', (ev) => { ev.preventDefault(); canvas.remove(); });
   };
 
-  // as fotos já estão no navegador; o WebGL entra depois do primeiro desenho da página
-  const iniciar = () => fotos.forEach(montar);
-  if ('requestIdleCallback' in window) requestIdleCallback(iniciar, { timeout: 1200 });
-  else setTimeout(iniciar, 300);
+  // o rodapé está longe do topo: monta quando o navegador estiver livre
+  if ('requestIdleCallback' in window) requestIdleCallback(montar, { timeout: 2000 });
+  else setTimeout(montar, 600);
 })();

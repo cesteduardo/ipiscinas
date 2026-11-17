@@ -364,7 +364,7 @@ def rodape():
     nav = "".join(f'<li><a href="{h}">{t}</a></li>' for h, t in NAV + [("/conta/", "Conta")])
     cats = "".join(f'<li><a href="/buscar/?cat={k}">{t}</a></li>' for k, t, _, _ in CATS)
     return f"""<div class="rodape__boias">{RAIA_BOIAS}</div>
-<footer class="rodape">
+<footer class="rodape" data-agua>
   <div class="rodape__in">
     <div class="rodape__col rodape__marca">
       {LOGO}
@@ -383,6 +383,7 @@ def rodape():
 </footer>
 <a class="zap-flut" href="{e(wa(ZAP_IPISCINAS, ZAP_TEXTO))}" target="_blank" rel="noopener" aria-label="Falar com o iPiscinas no WhatsApp">{ZAP_SVG}</a>
 <script src="/assets/js/site.js?v={VERSAO}" defer></script>
+<script src="/assets/js/agua.js?v={VERSAO}" defer></script>
 """
 
 
@@ -604,7 +605,7 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
                else f'srcset="{srcset(u, 500, 900)}" sizes="(max-width: 700px) 46vw, 420px"')
         pr = preco(p.get("precoBase"))
         vitrine.append(f"""<a class="vit vit--{k + 1}" href="/piscina/{pid}/">
-  <span class="vit__foto" data-agua><img crossorigin="anonymous" src="{e(img(u, 900 if k else 1400))}" {tam} alt="Piscina {e(limpa(p['nome']))}, de {e(limpa(p['loja']['nome']))}" width="1400" height="930" {carregar}></span>
+  <span class="vit__foto"><img src="{e(img(u, 900 if k else 1400))}" {tam} alt="Piscina {e(limpa(p['nome']))}, de {e(limpa(p['loja']['nome']))}" width="1400" height="930" {carregar}></span>
   <span class="vit__leg"><strong>{e(limpa(p['nome']))}</strong><span>{e(limpa(p['loja']['nome']))}{' · ' + e(pr) if pr else ''}</span></span>
 </a>""")
 
@@ -710,7 +711,7 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
     </div>
   </section>
 </main>
-""" + rodape() + fim(f'<script src="/assets/js/agua.js?v={VERSAO}" defer></script>\n')
+""" + rodape() + fim()
 
 
 SIGLAS = {"ipiscinas": "iPiscinas", "uol": "UOL", "tse": "TSE", "meta": "Meta", "google": "Google", "brasil": "Brasil"}

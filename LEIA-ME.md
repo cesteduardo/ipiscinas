@@ -13,7 +13,7 @@ python3 -m http.server 4860                  # ver em http://localhost:4860
 - Identidade: no computador, topo colado que se solta em pílula ao rolar; no celular, topo fixo e centralizado (o menu é a barra de abas). Piso de pastilhas no degradê, raia flutuante (corda de boias) de ponta a ponta da tela, correndo devagar, e vitrine no topo com uma foto grande e duas menores.
 - Hover: um sistema só, no fim do `site.css` ("a luz da água segue o cursor"). Luz azul rala por dentro e borda que acende perto do mouse; título azul-forte; cartão sobe 4px com sombra azulada. O JS só passa `--mx`/`--my`.
 - Vidro líquido: no computador, uma gota de vidro corre pelo menu do topo (segue o mouse, com mola). No celular, a gaveta virou uma barra de abas de vidro embaixo (Início, Buscar, Mapa, Blog, Conta): a gota escorre até a aba, o ícone faz um gesto curto e a página troca. Tudo em `assets/js/site.js` (`liquido`).
-- Água nas fotos da vitrine: `assets/js/agua.js` põe um canvas WebGL sobre cada `[data-agua]` com ondas e cáusticas (mais fortes no hover). A `<img>` fica embaixo como reserva; desliga com "menos movimento" e pausa fora da tela. As fotos do topo têm `crossorigin` para virar textura.
+- Ondas no rodapé: `assets/js/agua.js` (shader do WaterRippleImage) desenha um piso de pastilhas visto através da água atrás do rodapé `[data-agua]`, com opacidade .3. As fotos do topo não têm animação. Desliga com "menos movimento" e pausa fora da tela.
 - Blog: a notícia mais recente abre a página e a seção do início.
 - Login e cadastro falam com a API real e guardam a sessão com as mesmas chaves do app.
 - CSS e JS em `assets/` são editados direto. A busca e o mapa leem `dados/busca.json`, gerado pelo build.
