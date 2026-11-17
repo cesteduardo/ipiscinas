@@ -644,7 +644,6 @@ def pag_inicio(lojas, piscinas, destaque_ids, posts):
   <section class="heroi heroi--inicio heroi--centro">
     <div class="wrap">
       <div class="heroi__txt">
-        <p class="heroi__ola">Olá 👋</p>
         <h1>Tudo para sua piscina<em>em um só lugar.</em></h1>
         <p class="heroi__sub">Descubra lojas, modelos de piscinas e solicite orçamentos.</p>
         <form class="busca-card" action="/buscar/" method="get" role="search">

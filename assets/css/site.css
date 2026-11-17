@@ -229,7 +229,6 @@ main::after {
 .heroi h1 { color: #fff; font-size: clamp(40px, 5.6vw, 76px); line-height: 1.01; letter-spacing: -.036em; max-width: 18ch; margin-inline: auto; overflow-wrap: anywhere; }
 .heroi h1 em { color: rgb(255 255 255 / .66); }
 .heroi__sub { margin: 18px auto 0; max-width: 46ch; font-size: clamp(17px, 1.5vw, 20px); color: rgb(255 255 255 / .94); }
-.heroi__ola { font-weight: 500; color: rgb(255 255 255 / .92); margin-bottom: 12px; }
 .heroi__conta { margin-top: 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 10px; font-size: 15px; color: var(--ink-2); }
 .heroi__estrelas { display: inline-flex; gap: 2px; }
 .heroi__estrelas svg { color: var(--sol); fill: var(--sol); }
